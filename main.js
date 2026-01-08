@@ -4,6 +4,7 @@ const csv = require('csv-parser');
 const csvFilePath = process.argv[2];
 const columnName = process.argv[3];
 
+// Check arguments
 if (!csvFilePath || !columnName) {
   console.error('Usage: node main.js <csv_file_path> <column_name>');
   process.exit(1);
@@ -11,7 +12,7 @@ if (!csvFilePath || !columnName) {
 
 // Check if file exists
 if (!fs.existsSync(csvFilePath)) {
-  console.error('Error: File not found');
+  console.error('Error: File not found'); // Exact string
   process.exit(1);
 }
 
@@ -23,13 +24,13 @@ fs.createReadStream(csvFilePath)
   .pipe(csv())
   .on('headers', (headers) => {
     if (!headers.includes(columnName)) {
-      console.error('Error: Column not found');
+      console.error('Error: Column not found'); // Exact string
       process.exit(1);
     }
     columnExists = true;
   })
-  .on('data', (data) => {
-    const value = Number(data[columnName]);
+  .on('data', (row) => {
+    const value = Number(row[columnName]);
     if (!isNaN(value)) {
       sum += value;
       count++;
@@ -41,8 +42,10 @@ fs.createReadStream(csvFilePath)
       console.log(`The average value of ${columnName} is: ${average}`);
     } else if (columnExists) {
       console.error(`Error: No numeric data in column ${columnName}`);
+      process.exit(1);
     }
   })
   .on('error', (err) => {
     console.error(`Error reading CSV file: ${err.message}`);
+    process.exit(1);
   });
